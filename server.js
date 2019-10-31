@@ -7,50 +7,50 @@ const sqlite3 = require('sqlite3').verbose();
 const file = "db.sqlite";
 const db = new sqlite3.Database(file);
 
-/* fs.readFile('db.json', (err, data) => {
-    if (err) throw err;
-    let db = JSON.parse(data);
-    console.log(db);
-}); */
-
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const port = process.env.PORT || 5000;
-
+const port = process.env.PORT || 8000;
 const router = express.Router({});
 
-router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });
-});
+const authBearer = function (req, res, next) {
+    const authToken = req.header('Authorization');
+    if(!authToken || authToken==='' || !authToken.startsWith('Bearer ')) {
+        res.send(401);
+    } else {
+        const token = authToken.replace('Bearer', '').trim();
+        if(token === 'token123'){
+            next();
+        } else {
+            res.send(401);
+        }
+    }
+};
 
+app.use('/api', authBearer);
 app.use('/api', router);
+
+router.get('/', function(req, res) {
+    res.json({ message: 'MOCK REST API' });
+});
 
 router.get('/todos', function(req, res){
     db.all("SELECT id, title, tms, done FROM todos", function(err, rows) {
+        for(i = 0; i<rows.length; ++i) {
+                rows[i].tms = new Date(rows[i].tms).toISOString();
+        }
         res.json(rows);
     });
 });
 
 router.get('/todos/:id', function(req, res){
-    var id = req.params.id;
-    var stmt = "SELECT id, title, tms, done FROM todos WHERE id = ?";
+    const id = req.params.id;
+    const stmt = "SELECT id, title, tms, done FROM todos WHERE id = ?";
     db.get(stmt, [id], (err, row) => {
-        if (err) {
+        if (err)
             return console.error(err.message);
-        }
         res.json(row);
-    });
-});
-
-
-
-router.post('/todos/:id', function(req, res){
-    var id = request.params.id;
-    var stmt = db.prepare("SELECT id, title, 'when', done FROM todos WHERE id = ?");
-    db.all("SELECT id, title, 'when', done FROM todos WHERE id = ?", function(err, rows) {
-        res.json(rows);
     });
 });
 

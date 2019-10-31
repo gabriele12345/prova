@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <script>
+            $(document).ready(function () {
+                $.get({
+                    url: "https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos",
+                    headers: {"Authorization": "Bearer token123"},
+                    success: function (todos) {
+                        $("#title").text('Ci sono ' + todos.length + ' task non svolte!');
+                        for (index = 0; index < todos.length; ++index) {
+                            $("#todos").append('<li>' + todos[index].title + '</li>');
+                        }
+                    }
+                });
+            });
+        </script>
+        <div id="title"></div>
+        <ul id="todos"></ul>
+    </body>
+</html>
