@@ -5,16 +5,60 @@
 </head>
 <body>
 <script>
-    function newElement() {
+    //const apiEndpoint = "https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos";
+    const apiEndpoint = "http://localhost:8000/api/todos";
+
+    function checkAsDoneTodoAPI(todoId, done) {
+        $.ajax({
+            type: 'PUT',
+            dataType: 'json',
+            url: apiEndpoint,
+            data: {done: done, id: todoId},
+            headers: {"Authorization": "Bearer token123"},
+            success: function (result) {
+                const todoElemId = 'todo_' + todoId;
+                const todoElement = $('#' + todoElemId);
+                if(done) todoElement.addClass('checked');
+                if(!done) todoElement.removeClass('checked');
+            }
+        });
+    }
+
+    function deleteTodoAPI(todoId) {
+        $.ajax({
+            type: 'DELETE',
+            dataType: 'html',
+            url: apiEndpoint + '/' + todoId,
+            headers: {"Authorization": "Bearer token123"},
+            success: function (result) {
+                const todoElemId = 'todo_' + todoId;
+                const todoElement = $('#' + todoElemId);
+                todoElement.fadeOut(300, function () {
+                    $(this).remove();
+                });
+            }
+        });
+    }
+
+    function saveTodoAPI() {
         const newTodoTitleNode = $("#newTodoTitle")[0];
         const inputValue = newTodoTitleNode.value;
         if (inputValue === '')
             return;
-        createTodo({title: inputValue, done: false})
+        const todoInfo = {title: inputValue, done: false, tms: new Date().toISOString()};
         newTodoTitleNode.value = "";
+        $.post({
+            url: apiEndpoint,
+            headers: {"Authorization": "Bearer token123"},
+            data: todoInfo,
+            success: function (result) {
+                todoInfo.id = result.id;
+                createTodoListItem(todoInfo);
+            }
+        });
     }
 
-    function createTodo(todoInfo) {
+    function createTodoListItem(todoInfo) {
         const todo = document.createElement('li');
         const closeButton = document.createElement('span');
 
@@ -25,7 +69,8 @@
             .html(todoInfo.title)
             .appendTo($("#todos"))
             .click(function () {
-                $(this).addClass('checked');
+                // $(this).addClass('checked');
+                checkAsDoneTodoAPI(todoInfo.id, !$(this).hasClass('checked'));
             });
 
         $(closeButton)
@@ -33,17 +78,18 @@
             .text('x')
             .appendTo($(todo))
             .click(function () {
-                $(this).parent().fadeOut();
+                // $(this).parent().fadeOut();
+                deleteTodoAPI(todoInfo.id);
             });
     }
 
     $(document).ready(function () {
         $.get({
-            url: "https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos",
+            url: apiEndpoint,
             headers: {"Authorization": "Bearer token123"},
             success: function (todos) {
                 for (let i = 0; i < todos.length; ++i)
-                    createTodo(todos[i]);
+                    createTodoListItem(todos[i]);
             }
         });
     });
@@ -51,7 +97,7 @@
 <div id="myDIV" class="header">
     <h2 style="margin:5px">My To Do List</h2>
     <input type="text" id="newTodoTitle" placeholder="Title...">
-    <span onclick="newElement()" class="addBtn">Add</span>
+    <span onclick="saveTodoAPI()" class="addBtn">Add</span>
 </div>
 <ul id="todos"></ul>
 </body>

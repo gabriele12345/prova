@@ -8,7 +8,7 @@ const file = "db.sqlite";
 const db = new sqlite3.Database(file);
 
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 const port = process.env.PORT || 8000;
@@ -16,11 +16,11 @@ const router = express.Router({});
 
 const authBearer = function (req, res, next) {
     const authToken = req.header('Authorization');
-    if(!authToken || authToken==='' || !authToken.startsWith('Bearer ')) {
+    if (!authToken || authToken === '' || !authToken.startsWith('Bearer ')) {
         res.send(401);
     } else {
         const token = authToken.replace('Bearer', '').trim();
-        if(token === 'token123'){
+        if (token === 'token123') {
             next();
         } else {
             res.send(401);
@@ -31,20 +31,19 @@ const authBearer = function (req, res, next) {
 app.use('/api', authBearer);
 app.use('/api', router);
 
-router.get('/', function(req, res) {
-    res.json({ message: 'MOCK REST API' });
+router.get('/', function (req, res) {
+    res.json({message: 'MOCK REST API'});
 });
 
-router.get('/todos', function(req, res){
-    db.all("SELECT id, title, tms, done FROM todos", function(err, rows) {
-        for(i = 0; i<rows.length; ++i) {
-                rows[i].tms = new Date(rows[i].tms).toISOString();
-        }
+router.get('/todos', function (req, res) {
+    db.all("SELECT id, title, tms, done FROM todos", function (err, rows) {
+        for (i = 0; i < rows.length; ++i)
+            rows[i].tms = new Date(rows[i].tms).toISOString();
         res.json(rows);
     });
 });
 
-router.get('/todos/:id', function(req, res){
+router.get('/todos/:id', function (req, res) {
     const id = req.params.id;
     const stmt = "SELECT id, title, tms, done FROM todos WHERE id = ?";
     db.get(stmt, [id], (err, row) => {
@@ -54,12 +53,36 @@ router.get('/todos/:id', function(req, res){
     });
 });
 
-router.post('/todos', function(req, res){
+router.post('/todos', function (req, res) {
     const todoInfo = req.body;
     const stmt = "INSERT INTO todos(title, tms) VALUES(?,?)";
     const query = db.prepare(stmt);
     const tms = new Date(todoInfo.tms);
-    query.run(todoInfo.title, tms);
+    query.run([todoInfo.title, tms], function (error) {
+        const newId = this.lastID;
+        res.json({success: true, id: newId});
+        res.send(200);
+    });
+});
+
+router.put('/todos', function (req, res) {
+    const todoInfo = req.body;
+    const stmt = "UPDATE todos SET done = " + todoInfo.done + " WHERE id = ?";
+    const query = db.prepare(stmt);
+    query.run([todoInfo.id], function (error) {
+        const newId = this.lastID;
+        res.json({success: true, id: newId});
+        res.send(200);
+    });
+});
+
+router.delete('/todos/:id', function (req, res) {
+    const id = req.params.id;
+    const stmt = "DELETE FROM todos WHERE id = ?";
+    const query = db.prepare(stmt);
+    query.run(id);
+    res.json({success: true});
+    res.send(200);
 });
 
 app.listen(port);
