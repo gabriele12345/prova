@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -6,6 +7,10 @@ const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const file = "db.sqlite";
 const db = new sqlite3.Database(file);
+
+app.get('/home', function(req, res) {
+    res.sendfile(path.join(__dirname + '/ajax.html'));
+});
 
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
