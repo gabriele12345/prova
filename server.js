@@ -54,5 +54,13 @@ router.get('/todos/:id', function(req, res){
     });
 });
 
+router.post('/todos', function(req, res){
+    const todoInfo = req.body;
+    const stmt = "INSERT INTO todos(title, tms) VALUES(?,?)";
+    const query = db.prepare(stmt);
+    const tms = new Date(todoInfo.tms);
+    query.run(todoInfo.title, tms);
+});
+
 app.listen(port);
 console.log('Magic happens on port ' + port);

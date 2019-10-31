@@ -1,24 +1,58 @@
 <html>
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="style.css">
-    </head>
-    <body>
-        <script>
-            $(document).ready(function () {
-                $.get({
-                    url: "https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos",
-                    headers: {"Authorization": "Bearer token123"},
-                    success: function (todos) {
-                        $("#title").text('Ci sono ' + todos.length + ' task non svolte!');
-                        for (index = 0; index < todos.length; ++index) {
-                            $("#todos").append('<li' + (todos[index].done ? 'class=\"checked\">' : '>') + todos[index].title + '</li>');
-                        }
-                    }
-                });
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<script>
+    function newElement() {
+        const newTodoTitleNode = $("#newTodoTitle")[0];
+        const inputValue = newTodoTitleNode.value;
+        if (inputValue === '')
+            return;
+        createTodo({title: inputValue, done: false})
+        newTodoTitleNode.value = "";
+    }
+
+    function createTodo(todoInfo) {
+        const todo = document.createElement('li');
+        const closeButton = document.createElement('span');
+
+        $(todo)
+            .attr("id", "todo_" + todoInfo.id)
+            .addClass('todo')
+            .addClass(todoInfo.done ? 'checked' : '')
+            .html(todoInfo.title)
+            .appendTo($("#todos"))
+            .click(function () {
+                $(this).addClass('checked');
             });
-        </script>
-        <div id="title"></div>
-        <ul id="todos"></ul>
-    </body>
+
+        $(closeButton)
+            .addClass('close')
+            .text('x')
+            .appendTo($(todo))
+            .click(function () {
+                $(this).parent().fadeOut();
+            });
+    }
+
+    $(document).ready(function () {
+        $.get({
+            url: "https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos",
+            headers: {"Authorization": "Bearer token123"},
+            success: function (todos) {
+                for (let i = 0; i < todos.length; ++i)
+                    createTodo(todos[i]);
+            }
+        });
+    });
+</script>
+<div id="myDIV" class="header">
+    <h2 style="margin:5px">My To Do List</h2>
+    <input type="text" id="newTodoTitle" placeholder="Title...">
+    <span onclick="newElement()" class="addBtn">Add</span>
+</div>
+<ul id="todos"></ul>
+</body>
 </html>
