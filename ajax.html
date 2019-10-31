@@ -1,6 +1,7 @@
 <html>
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
         <script>
@@ -11,7 +12,7 @@
                     success: function (todos) {
                         $("#title").text('Ci sono ' + todos.length + ' task non svolte!');
                         for (index = 0; index < todos.length; ++index) {
-                            $("#todos").append('<li>' + todos[index].title + '</li>');
+                            $("#todos").append('<li' + (todos[index].done ? 'class=\"checked\">' : '>') + todos[index].title + '</li>');
                         }
                     }
                 });
