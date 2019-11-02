@@ -8,15 +8,15 @@ const sqlite3 = require('sqlite3').verbose();
 const file = "db.sqlite";
 const db = new sqlite3.Database(file);
 
-app.get('/home', function(req, res) {
+app.get('/home', function (req, res) {
     res.sendfile(path.join(__dirname + '/ajax.html'));
 });
 
-app.get('/controller.js', function(req, res) {
+app.get('/controller.js', function (req, res) {
     res.sendfile(path.join(__dirname + '/controller.js'));
 });
 
-app.get('/style.css', function(req, res) {
+app.get('/style.css', function (req, res) {
     res.sendfile(path.join(__dirname + '/style.css'));
 });
 
@@ -69,11 +69,11 @@ router.get('/todos/:id', function (req, res) {
 router.post('/todos', function (req, res) {
     const todoInfo = req.body;
     const stmt = "INSERT INTO todos(title, tms) VALUES(?,?)";
-    const query = db.prepare(stmt);
     const tms = new Date(todoInfo.tms);
-    query.run([todoInfo.title, tms], function (error) {
-        if(error !== undefined) res.json({success: false});
-        else {
+    db.run(stmt, [todoInfo.title, tms], function (error) {
+        if (error) {
+            res.json({success: false, error: error.message});
+        } else {
             res.json({success: true, id: this.lastID});
             res.send(200);
         }
@@ -83,10 +83,10 @@ router.post('/todos', function (req, res) {
 router.put('/todos', function (req, res) {
     const todoInfo = req.body;
     const stmt = "UPDATE todos SET done = " + todoInfo.done + " WHERE id = ?";
-    const query = db.prepare(stmt);
-    query.run([todoInfo.id], function (error) {
-        if(error !== undefined) res.json({success: false});
-        else {
+    db.run(stmt, [todoInfo.id], function (error) {
+        if (error) {
+            res.json({success: false, error: error.message});
+        } else {
             res.json({success: true});
             res.send(200);
         }
