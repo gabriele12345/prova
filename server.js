@@ -72,9 +72,11 @@ router.post('/todos', function (req, res) {
     const query = db.prepare(stmt);
     const tms = new Date(todoInfo.tms);
     query.run([todoInfo.title, tms], function (error) {
-        const newId = this.lastID;
-        res.json({success: true, id: newId});
-        res.send(200);
+        if(error !== undefined) res.json({success: false});
+        else {
+            res.json({success: true, id: this.lastID});
+            res.send(200);
+        }
     });
 });
 
@@ -83,9 +85,11 @@ router.put('/todos', function (req, res) {
     const stmt = "UPDATE todos SET done = " + todoInfo.done + " WHERE id = ?";
     const query = db.prepare(stmt);
     query.run([todoInfo.id], function (error) {
-        const newId = this.lastID;
-        res.json({success: true, id: newId});
-        res.send(200);
+        if(error !== undefined) res.json({success: false});
+        else {
+            res.json({success: true});
+            res.send(200);
+        }
     });
 });
 
