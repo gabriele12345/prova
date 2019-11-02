@@ -1,5 +1,5 @@
-const apiEndpoint = 'http://localhost:8000/api/todos';
-//const apiEndpoint = 'https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos';
+//const apiEndpoint = 'http://localhost:8000/api/todos';
+const apiEndpoint = 'https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos';
 
 const authHeader = {'Authorization': 'Bearer token123'};
 
