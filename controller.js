@@ -71,7 +71,8 @@ const controller = {
         $.ajax({
             type: 'DELETE',
             dataType: 'json',
-            url: apiEndpoint + '/' + todoId,
+            url: apiEndpoint,
+            data: {id: todoId},
             headers: authHeader,
             success: function (result) {
                 _this.removeTodoFromList(todoId);

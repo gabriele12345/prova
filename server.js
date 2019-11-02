@@ -93,11 +93,11 @@ router.put('/todos', function (req, res) {
     });
 });
 
-router.delete('/todos/:id', function (req, res) {
-    const id = req.params.id;
+router.delete('/todos', function (req, res) {
+    const todoInfo = req.body;
+    const id = todoInfo.id;
     const stmt = "DELETE FROM todos WHERE id = ?";
-    const query = db.prepare(stmt);
-    query.run(id);
+    db.run(stmt, [id]);
     res.json({success: true});
     res.send(200);
 });
