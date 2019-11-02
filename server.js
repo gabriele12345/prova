@@ -8,7 +8,7 @@ const sqlite3 = require('sqlite3').verbose();
 const file = "db.sqlite";
 const db = new sqlite3.Database(file);
 
-app.get('/home', function (req, res) {
+app.get('/app', function (req, res) {
     res.sendfile(path.join(__dirname + '/ajax.html'));
 });
 
@@ -45,7 +45,7 @@ app.use('/api', authBearer);
 app.use('/api', router);
 
 router.get('/', function (req, res) {
-    res.json({message: 'MOCK REST API'});
+    res.sendfile(path.join(__dirname + '/ajax.html'));
 });
 
 router.get('/todos', function (req, res) {
