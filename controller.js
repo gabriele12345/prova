@@ -11,7 +11,7 @@ const controller = {
     },
 
     addTodoToList: function (todoInfos) {
-        allTodos.push(todoInfos);
+        this.allTodos.push(todoInfos);
     },
 
     removeTodoFromList: function (todoId) {
