@@ -67,7 +67,8 @@
                 .addClass('close')
                 .text('x')
                 .appendTo($(todo))
-                .click(function () {
+                .click(function (event) {
+                    event.stopPropagation();
                     deleteTodo(todoInfo.id);
                 });
         }
