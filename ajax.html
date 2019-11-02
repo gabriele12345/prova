@@ -61,6 +61,7 @@
                 .appendTo($('#todos'))
                 .click(function () {
                     checkTodo(todoInfo.id, !$(this).hasClass('checked'));
+                    renderTodos();
                 });
 
             $(todoText).html(todoInfo.title).addClass('todoTitleDiv').appendTo($(todo));
