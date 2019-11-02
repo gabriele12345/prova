@@ -7,9 +7,10 @@
     <script src="controller.js"></script>
     <title>My Todo SPA</title>
     <script type="text/javascript">
+
+
         function checkTodo(todoId, done) {
-            const todoInfo = {id: todoId, done: done};
-            controller.checkTodo(todoInfo, function (result) {
+            controller.checkTodo(todoId, done, function (result) {
                 if (result.success) {
                     const todoElemId = 'todo_' + todoId;
                     const todoElement = $('#' + todoElemId);
@@ -20,8 +21,7 @@
         }
 
         function deleteTodo(todoId) {
-            const todoInfo = {id: todoId};
-            controller.deleteTodo(todoInfo, function (result) {
+            controller.deleteTodo(todoId, function (result) {
                 if (result.success) {
                     const todoElemId = 'todo_' + todoId;
                     const todoElement = $('#' + todoElemId);
@@ -38,11 +38,14 @@
             if (inputValue === '')
                 return;
             newTodoTitleNode.value = '';
-            const todoInfo = {title: inputValue, done: false, tms: new Date().toISOString()};
-            controller.saveTodo(todoInfo, function (result) {
-                todoInfo.id = result.id;
-                createTodoListItem(todoInfo);
+            const todoItem = {title: inputValue, done: false, tms: new Date().toISOString()};
+            controller.saveTodo(todoItem, function (result) {
+                renderTodos();
             });
+        }
+
+        function emptyTodoList() {
+            $('#todos').empty();
         }
 
         function createTodoListItem(todoInfo) {
@@ -73,12 +76,25 @@
                 });
         }
 
+        function renderTodos() {
+            emptyTodoList();
+            const todos = controller.getFilterTodos();
+            for (let i = 0; i < todos.length; ++i)
+                createTodoListItem(todos[i]);
+        }
+
         $(document).ready(function () {
-            controller.getTodos(function (todos) {
-                for (let i = 0; i < todos.length; ++i)
-                    createTodoListItem(todos[i]);
+            controller.getTodos(function () {
+                renderTodos();
+            });
+
+            $('#filters input').change(function(event) {
+                const id = event.target.id;
+                controller.filters[id] = event.target.checked;
+                renderTodos();
             });
         });
+
     </script>
 </head>
 <body>
@@ -86,6 +102,16 @@
        <h2 class="title">My To Do List</h2>
         <input type="text" id="newTodoTitle" placeholder="New todo title..."/>
       <span onclick="saveTodo()" class="addBtn">Add</span>
+    </div>
+    <div id="filters" class="filters-row">
+        <label class="container">Done
+            <input id="done" type="checkbox" checked="checked">
+            <span class="checkmark"></span>
+        </label>
+        <label class="container">To do
+            <input id="todo" type="checkbox"  checked="checked">
+            <span class="checkmark"></span>
+        </label>
     </div>
     <ul id="todos"></ul>
 </body>
