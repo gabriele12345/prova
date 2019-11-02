@@ -12,6 +12,14 @@ app.get('/home', function(req, res) {
     res.sendfile(path.join(__dirname + '/ajax.html'));
 });
 
+app.get('/controller.js', function(req, res) {
+    res.sendfile(path.join(__dirname + '/controller.js'));
+});
+
+app.get('/style.css', function(req, res) {
+    res.sendfile(path.join(__dirname + '/style.css'));
+});
+
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());

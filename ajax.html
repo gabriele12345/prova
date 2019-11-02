@@ -1,206 +1,91 @@
 <html>
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: sans-serif;
-        }
-
-        ul {
-            margin: 0;
-            padding: 0;
-        }
-
-        ul li {
-            cursor: pointer;
-            position: relative;
-            padding: 12px 8px 12px 40px;
-            background: #eee;
-            font-size: 18px;
-            transition: 0.2s;
-
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        ul li:nth-child(odd) {
-            background: #f9f9f9;
-        }
-
-        ul li:hover {
-            background: #ddd;
-        }
-
-        ul li.checked {
-            background: #888;
-            color: #fff;
-            text-decoration: line-through;
-        }
-
-        ul li.checked::before {
-            content: '';
-            position: absolute;
-            border-color: #fff;
-            border-style: solid;
-            border-width: 0 2px 2px 0;
-            top: 10px;
-            left: 16px;
-            transform: rotate(45deg);
-            height: 15px;
-            width: 7px;
-        }
-
-        .close {
-            position: absolute;
-            right: 0;
-            top: 0;
-            padding: 12px 16px 12px 16px;
-        }
-
-        .close:hover {
-            background-color: #14a7f4;
-            color: white;
-        }
-
-        .header {
-            background-color: #14a7f4;
-            padding: 30px 40px;
-            color: white;
-            text-align: center;
-        }
-
-        .header:after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        input {
-            margin: 0;
-            border: none;
-            border-radius: 0;
-            width: 75%;
-            padding: 10px;
-            float: left;
-            font-size: 16px;
-        }
-
-        .addBtn {
-            padding: 10px;
-            width: 25%;
-            background: #d9d9d9;
-            color: #555;
-            float: left;
-            text-align: center;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            border-radius: 0;
-        }
-
-        .addBtn:hover {
-            background-color: #bbb;
-        }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/locale/it.js"></script>
+    <script src="controller.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<script>
-    //const apiEndpoint = "https://nigithoracademy-rest-api-mock.herokuapp.com/api/todos";
-    const apiEndpoint = "http://localhost:8000/api/todos";
+<script type="text/javascript">
 
-    function checkAsDoneTodoAPI(todoId, done) {
-        $.ajax({
-            type: 'PUT',
-            dataType: 'json',
-            url: apiEndpoint,
-            data: {done: done, id: todoId},
-            headers: {"Authorization": "Bearer token123"},
-            success: function (result) {
+    function checkTodo(todoId, done) {
+        const todoInfo = {id: todoId, done: done};
+        controller.checkTodo(todoInfo, function (result) {
+            if (result.success) {
                 const todoElemId = 'todo_' + todoId;
                 const todoElement = $('#' + todoElemId);
-                if(done) todoElement.addClass('checked');
-                if(!done) todoElement.removeClass('checked');
+                if (done) todoElement.addClass('checked');
+                if (!done) todoElement.removeClass('checked');
             }
         });
     }
 
-    function deleteTodoAPI(todoId) {
-        $.ajax({
-            type: 'DELETE',
-            dataType: 'html',
-            url: apiEndpoint + '/' + todoId,
-            headers: {"Authorization": "Bearer token123"},
-            success: function (result) {
+    function deleteTodo(todoId) {
+        const todoInfo = {id: todoId};
+        controller.deleteTodo(todoInfo, function (result) {
+            if (result.success) {
                 const todoElemId = 'todo_' + todoId;
                 const todoElement = $('#' + todoElemId);
-                todoElement.fadeOut(300, function () {
+                todoElement.fadeOut(500, function () {
                     $(this).remove();
                 });
             }
         });
     }
 
-    function saveTodoAPI() {
-        const newTodoTitleNode = $("#newTodoTitle")[0];
+    function saveTodo() {
+        const newTodoTitleNode = $('#newTodoTitle')[0];
         const inputValue = newTodoTitleNode.value;
         if (inputValue === '')
             return;
+        newTodoTitleNode.value = '';
         const todoInfo = {title: inputValue, done: false, tms: new Date().toISOString()};
-        newTodoTitleNode.value = "";
-        $.post({
-            url: apiEndpoint,
-            headers: {"Authorization": "Bearer token123"},
-            data: todoInfo,
-            success: function (result) {
-                todoInfo.id = result.id;
-                createTodoListItem(todoInfo);
-            }
+        controller.saveTodo(todoInfo, function(result){
+            todoInfo.id = result.id;
+            createTodoListItem(todoInfo);
         });
     }
 
     function createTodoListItem(todoInfo) {
+        const todoText = document.createElement('div');
+        const todoTimestamp = document.createElement('div');
         const todo = document.createElement('li');
         const closeButton = document.createElement('span');
 
         $(todo)
-            .attr("id", "todo_" + todoInfo.id)
+            .attr('id', 'todo_' + todoInfo.id)
             .addClass('todo')
             .addClass(todoInfo.done ? 'checked' : '')
-            .html(todoInfo.title)
-            .appendTo($("#todos"))
+            .appendTo($('#todos'))
             .click(function () {
-                // $(this).addClass('checked');
-                checkAsDoneTodoAPI(todoInfo.id, !$(this).hasClass('checked'));
+                checkTodo(todoInfo.id, !$(this).hasClass('checked'));
             });
+
+        $(todoText).html(todoInfo.title).addClass('todoTitleDiv').appendTo($(todo));
+        $(todoTimestamp).html(moment(todoInfo.tms).format('DD/MM/YYYY')).addClass('todoTimestampDiv').appendTo($(todo));
 
         $(closeButton)
             .addClass('close')
             .text('x')
             .appendTo($(todo))
             .click(function () {
-                // $(this).parent().fadeOut();
-                deleteTodoAPI(todoInfo.id);
+                deleteTodo(todoInfo.id);
             });
     }
 
     $(document).ready(function () {
-        $.get({
-            url: apiEndpoint,
-            headers: {"Authorization": "Bearer token123"},
-            success: function (todos) {
-                for (let i = 0; i < todos.length; ++i)
-                    createTodoListItem(todos[i]);
-            }
+        controller.getTodos(function(todos) {
+            for (let i = 0; i < todos.length; ++i)
+                createTodoListItem(todos[i]);
         });
     });
+
 </script>
-<div id="myDIV" class="header">
-    <h2 style="margin:5px">My To Do List</h2>
+<div id="newTodoDiv" class="header">
+    <h2 class="title">My To Do List</h2>
     <input type="text" id="newTodoTitle" placeholder="Title...">
-    <span onclick="saveTodoAPI()" class="addBtn">Add</span>
+    <span onclick="saveTodo()" class="addBtn">Add</span>
 </div>
 <ul id="todos"></ul>
 </body>
